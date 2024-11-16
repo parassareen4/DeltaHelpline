@@ -14,14 +14,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
-import responder from "../src/assets/chatgpt.svg"
+import responder from "../src/assets/deltalog.jpg"
 import copy from '../src/assets/copy.svg'
 import like from '../src/assets/like.svg'
 import dislike from '../src/assets/dislike.svg'
 import share from '../src/assets/share.svg'
 import newchat from '../src/assets/newchat.svg'
 
-const socket = io("https://chatgpttroll-production.up.railway.app/");
+const socket = io("http://localhost:4000/");
 
 socket.on("connect", () => {
   console.log("Connected to Socket.IO server:", socket.id);
@@ -168,11 +168,11 @@ const Chat = () => {
             <img src={newchat} alt="New Chat" className="h-4 w-4 sm:h-6 sm:w-6" />
           </button>
           <div className="flex gap-1 items-center">
-            <span className="font-semibold text-lg sm:text-xl text-zinc-700">ChatGPT </span>
+            <span className="font-semibold text-lg sm:text-xl text-zinc-700">Delta Help </span>
             <IoIosArrowDown />
           </div>
         </div>
-        <h1 className="text-lg sm:text-xl font-semibold hidden sm:flex gap-2 items-center">New Chat</h1>
+        <h1 className="text-lg sm:text-xl font-semibold hidden sm:flex gap-2 items-center">Keep Climbing</h1>
         <div className="flex items-center gap-2 sm:gap-6">
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -202,7 +202,7 @@ const Chat = () => {
         >
           {msg.role === 'responder' && (
             <div className="rounded-full mr-2 h-7 w-7 p-1 border border-slate-200 flex-shrink-0">
-              <img src={responder} alt="Responder Logo" className="rounded-full" />
+              <img  src={responder} alt="Responder Logo" className="rounded-full h-4 w-8" />
             </div>
           )}
           <div className={`${msg.role === "responder" ? "responder-bubble" : "asker-bubble"} max-w-[85%] sm:max-w-[70%] rounded-2xl sm:rounded-3xl px-3 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base ${msg.role === "responder" ? "text-left" : "text-right"} ${msg.role === 'asker' ? 'bg-[#f4f4f4]' : 'bg-white'}`}>
@@ -241,7 +241,7 @@ const Chat = () => {
             sendMessage(e);
           }
         }}
-        placeholder="Message ChatGpt"
+        placeholder="Ready When You Are"
         className="flex-1 py-2 sm:py-3 px-3 sm:px-5 rounded-[33px] bg-[#f4f4f4] focus-within:outline-none placeholder:text-slate-600 text-sm sm:text-base resize-none overflow-hidden"
         rows="1"
       />
@@ -254,7 +254,7 @@ const Chat = () => {
     </div>
   </form>
   <div className="text-center p-2 text-xs sm:text-sm hidden sm:block text-gray-500">
-    ChatGPT can make mistakes. Check important info.
+  The World’s Most Trusted Airline
   </div>
 </div>
 
