@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.responder-bubble,
+.asker-bubble {
+    max-width: 80%;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
