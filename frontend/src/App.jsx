@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
-import responder from "../src/assets/deltalog.jpg"
+import responder from "../src/assets/deltalog.png"
 import copy from '../src/assets/copy.svg'
 import like from '../src/assets/like.svg'
 import dislike from '../src/assets/dislike.svg'
@@ -201,8 +201,8 @@ const Chat = () => {
           className={`flex items-start relative ${msg.role === "responder" ? "justify-start" : "justify-end"}`}
         >
           {msg.role === 'responder' && (
-            <div className="rounded-full mr-2 h-7 w-7 p-1 border border-slate-200 flex-shrink-0">
-              <img  src={responder} alt="Responder Logo" className="rounded-full h-4 w-8" />
+            <div className="">
+              <img  src={responder} alt="Responder Logo" className="rounded-full h-7 w-7 object-cover" />
             </div>
           )}
           <div className={`${msg.role === "responder" ? "responder-bubble" : "asker-bubble"} max-w-[85%] sm:max-w-[70%] rounded-2xl sm:rounded-3xl px-3 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base ${msg.role === "responder" ? "text-left" : "text-right"} ${msg.role === 'asker' ? 'bg-[#f4f4f4]' : 'bg-white'}`}>
