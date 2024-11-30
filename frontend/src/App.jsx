@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
-import responder from "../src/assets/chatgpt.svg";
+import responder from "../src/assets/southwest.jpg";
 import copy from '../src/assets/copy.svg';
 import like from '../src/assets/like.svg';
 import dislike from '../src/assets/dislike.svg';
@@ -225,9 +225,9 @@ const Chat = () => {
                 }`}
               >
                 {msg.role === 'responder' && (
-                  <div className="rounded-full mr-2 h-7 w-7  p-1 border border-slate-200  flex-shrink-0">
+                  <div className="rounded-full mr-2 h-7 w-7   border border-slate-200  flex-shrink-0">
                     <img
-src={responder} alt="Responder Logo" className="  rounded-full " />
+src={responder} alt="Responder Logo" className="  rounded-full h-100%" />
                   </div>
                 )}
                 <div
