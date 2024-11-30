@@ -168,7 +168,7 @@ const Chat = () => {
             <img src={newchat} alt="New Chat" className="h-4 w-4 sm:h-6 sm:w-6" />
           </button>
           <div className="flex gap-1 items-center">
-            <span className="font-semibold text-lg sm:text-xl text-zinc-700">Delta Help </span>
+            <span className="font-semibold text-lg sm:text-xl text-zinc-700">SouthWest </span>
             <IoIosArrowDown />
           </div>
         </div>
