@@ -262,23 +262,8 @@ src={responder} alt="Responder Logo" className="  rounded-full h-100%" />
               </motion.div>
             )
           })}
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={`flex ${window.location.pathname.includes('/chat/') ? "justify-end" : "justify-start"}`}
-            >
-              <div className="max-w-3/4 p-2 sm:p-3 rounded-lg bg-gray-100 text-gray-800 mt-2 sm:mt-3">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce"></div>
-                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce delay-100"></div>
-                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce delay-200"></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
+         
+           
           <div ref={chatEndRef}></div>
         </AnimatePresence>
       </main>
