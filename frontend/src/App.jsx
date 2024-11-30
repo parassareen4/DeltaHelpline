@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -8,20 +8,20 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { io } from "socket.io-client";
-import { MessageSquare, ArrowUpIcon, User2Icon, ArrowLeft } from "lucide-react";
+import { MessageSquare, ArrowUpIcon, User2Icon, ImageIcon } from 'lucide-react';
 import { IoIosArrowDown } from "react-icons/io";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
-import responder from "../src/assets/deltalog.png"
-import copy from '../src/assets/copy.svg'
-import like from '../src/assets/like.svg'
-import dislike from '../src/assets/dislike.svg'
-import share from '../src/assets/share.svg'
-import newchat from '../src/assets/newchat.svg'
+import responder from "../src/assets/chatgpt.svg";
+import copy from '../src/assets/copy.svg';
+import like from '../src/assets/like.svg';
+import dislike from '../src/assets/dislike.svg';
+import share from '../src/assets/share.svg';
+import newchat from '../src/assets/newchat.svg';
 
-const socket = io("https://deltahelpline.onrender.com");
+const socket = io("https://chatgpttroll-3l88.onrender.com/");
 
 socket.on("connect", () => {
   console.log("Connected to Socket.IO server:", socket.id);
@@ -36,52 +36,43 @@ const Chat = () => {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const chatEndRef = useRef(null);
   const navigate = useNavigate();
-
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
   useEffect(() => {
     socket.emit("joinRoom", roomId);
     socket.emit("getMessages", roomId);
     socket.emit("userJoined", { roomId });
-
     const handleChatHistory = (messages) => {
       setChat(messages);
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      scrollToBottom();
     };
 
-    const handleQuestion = ({ roomId: receivedRoomId, msg }) => {
-      if (receivedRoomId === roomId) {
-        setChat((prevChat) => {
-          const newChat = [...prevChat, { role: "asker", message: msg }];
-          chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          scrollToBottom();
-          return newChat;
-        });
-      }
+    const handleQuestion = (newMessage) => {
+      setChat((prevChat) => {
+        const newChat = [...prevChat, newMessage];
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        return newChat;
+      });
     };
 
-    const handleResponse = ({ roomId: receivedRoomId, msg }) => {
-      if (receivedRoomId === roomId) {
-        setChat((prevChat) => {
-          const newChat = [...prevChat, { role: "responder", message: msg }];
-          chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          scrollToBottom();
-          return newChat;
-        });
-      }
+    const handleResponse = (newMessage) => {
+      setChat((prevChat) => {
+        const newChat = [...prevChat, newMessage];
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        return newChat;
+      });
     };
 
     const handleRoomDeleted = ({ roomId }) => {
+      console.log(`Room ${roomId} has been deleted`);
       toast.success(`Room ${roomId} has been deleted`);
       navigate("/");
     };
 
     const handleTyping = () => {
+      console.log("Typing...");
       setIsTyping(true);
     };
 
@@ -104,28 +95,59 @@ const Chat = () => {
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
     };
-  }, [roomId]);
+  }, [roomId, navigate]);
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() || selectedImage) {
       const role = window.location.pathname.includes("/chat/")
         ? "responder"
         : "asker";
-      socket.emit(role === "responder" ? "response" : "question", {
-        roomId,
-        msg: message,
-      });
+      
+      if (selectedImage) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          socket.emit(role === "responder" ? "response" : "question", {
+            roomId,
+            msg: message,
+            image: reader.result,
+          });
+        };
+        reader.readAsDataURL(selectedImage);
+      } else {
+        socket.emit(role === "responder" ? "response" : "question", {
+          roomId,
+          msg: message,
+        });
+      }
+
       setMessage("");
+      setSelectedImage(null);
       socket.emit("stopTyping", { roomId });
-      scrollToBottom(); // Scroll to the bottom after sending a message
     }
   };
 
+  const handleStopTyping = () => {
+    socket.emit("stopTyping", { roomId });
+  };
+
+  let typingTimeout;
   const handleInputChange = (e) => {
     setMessage(e.target.value);
     socket.emit("typing", { roomId });
     autoResize(e.target);
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(handleStopTyping, 1000);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setSelectedImage(file);
+    } else {
+      toast.error("Please select a valid image file");
+    }
   };
 
   const shareChat = () => {
@@ -141,7 +163,7 @@ const Chat = () => {
         navigator.clipboard.writeText(shareData.url).then(() => {
             toast.success("Link copied to clipboard!");
         }).catch((err) => {
-            toast.error("Could not copy text...");
+            toast.error("Could not copy text...", err);
         });
     }
   };
@@ -172,7 +194,7 @@ const Chat = () => {
             <IoIosArrowDown />
           </div>
         </div>
-        <h1 className="text-lg sm:text-xl font-semibold hidden sm:flex gap-2 items-center">Keep Climbing</h1>
+        <h1 className="text-lg sm:text-xl font-semibold hidden sm:flex gap-2 items-center">Keep Climbing </h1>
         <div className="flex items-center gap-2 sm:gap-6">
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -185,152 +207,167 @@ const Chat = () => {
         </div>
       </header>
       <main className="w-full sm:w-11/12 md:w-10/12 lg:w-9/12 mx-auto flex-1 overflow-auto p-2 sm:p-4 space-y-4 sm:space-y-6 mt-6 hide-scrollbar scroll-smooth">
-  <AnimatePresence>
-    {chat.map((msg, idx) => {
-      const isLastResponderMessage =
-        msg.role === "responder" &&
-        (idx === chat.length - 1);
-
-      return (
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className={`flex items-start relative ${msg.role === "responder" ? "justify-start" : "justify-end"}`}
-        >
-          {msg.role === 'responder' && (
-            <div className="">
-              <img  src={responder} alt="Responder Logo" className="rounded-full h-7 w-7 object-cover" />
-            </div>
+        <AnimatePresence>
+          {chat.map((msg, idx) => {
+            const isLastResponderMessage =
+              msg.role === "responder" &&
+              (idx === chat.length - 1);
+            
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`flex items-start relative ${
+                  msg.role === "responder" ? "justify-start" : "justify-end"
+                }`}
+              >
+                {msg.role === 'responder' && (
+                  <div className="rounded-full mr-2 h-7 w-7  p-1 border border-slate-200  flex-shrink-0">
+                    <img
+src={responder} alt="Responder Logo" className="  rounded-full " />
+                  </div>
+                )}
+                <div
+                  className={`${
+                    msg.role === "responder" ? "responder-bubble" : "asker-bubble"
+                  } max-w-[85%] sm:max-w-[70%] rounded-2xl sm:rounded-3xl px-3 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base ${
+                    msg.role === "responder" ? "text-left" : "text-right"
+                  } ${msg.role === 'asker' ? 'bg-[#f4f4f4]' : 'bg-white'}`}
+                >
+                  {msg.message}
+                  {msg.image && (
+                    <img
+                      src={msg.image}
+                      alt="Uploaded"
+                      className="mt-2 max-w-full h-auto rounded-lg"
+                    />
+                  )}
+                </div>
+                {isLastResponderMessage && (
+                  <div className="flex space-x-1 mt-1 sm:mt-2 absolute left-8 sm:left-12 top-full">
+                    <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
+                      <img src={copy} alt="Copy" className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div>
+                    <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
+                      <img src={like} alt="Like" className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div>
+                    <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
+                      <img src={dislike} alt="Dislike" className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div> 
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className={`flex ${window.location.pathname.includes('/chat/') ? "justify-end" : "justify-start"}`}
+            >
+              <div className="max-w-3/4 p-2 sm:p-3 rounded-lg bg-gray-100 text-gray-800 mt-2 sm:mt-3">
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce"></div>
+                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce delay-100"></div>
+                  <div className="typing-dot bg-gray-400 rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 animate-bounce delay-200"></div>
+                </div>
+              </div>
+            </motion.div>
           )}
-          <div className={`${msg.role === "responder" ? "responder-bubble" : "asker-bubble"} max-w-[85%] sm:max-w-[70%] rounded-2xl sm:rounded-3xl px-3 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base ${msg.role === "responder" ? "text-left" : "text-right"} ${msg.role === 'asker' ? 'bg-[#f4f4f4]' : 'bg-white'}`}>
-            {msg.message}
+          <div ref={chatEndRef}></div>
+        </AnimatePresence>
+      </main>
+      
+      <form onSubmit={sendMessage} className="p-2 sm:p-4">
+        <div className="flex items-center w-full sm:w-10/12 md:w-9/12 lg:w-7/12 mx-auto space-x-2 py-1 rounded-[33px] bg-[#f4f4f4] relative pr-2">
+         
+          
+          <textarea
+            value={message}
+            onChange={handleInputChange}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(e);
+              }
+            }}
+            placeholder="Ready when you are..."
+            className="flex-1 py-2 sm:py-3 px-3 sm:px-5 rounded-[33px] bg-[#f4f4f4] focus-within:outline-none placeholder:text-slate-600 text-sm sm:text-base resize-none overflow-hidden"
+            rows="1"
+          />
+          <button
+            type="submit"
+            className="p-1.5 sm:p-2 rounded-full bg-black text-white hover:bg-opacity-75"
+          >
+            <ArrowUpIcon size={18} className="sm:w-5 sm:h-5" fontWeight={900} />
+          </button>
+        </div>
+        {selectedImage && (
+          <div className="mt-2 text-sm text-gray-500">
+            Image selected: {selectedImage.name}
           </div>
-          {isLastResponderMessage && (
-            <div className="flex space-x-1 mt-1 sm:mt-2 absolute left-8 sm:left-12 top-full">
-              <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
-                <img src={copy} alt="Copy" className="h-3 w-3 sm:h-4 sm:w-4" />
-              </div>
-              <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
-                <img src={like} alt="Like" className="h-3 w-3 sm:h-4 sm:w-4" />
-              </div>
-              <div className="p-1 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full">
-                <img src={dislike} alt="Dislike" className="h-3 w-3 sm:h-4 sm:w-4" />
-              </div>
-            </div>
-          )}
-        </motion.div>
-      );
-    })}
-
-  </AnimatePresence>
-  <div ref={chatEndRef} />
-  <div className="h-10"></div>
-</main>
-
-<form onSubmit={sendMessage} className="p-1 sm:p-1 mt-2 ">
-    <div className="flex items-center w-full sm:w-10/12 md:w-9/12 lg:w-7/12 mx-auto space-x-2 py-1 rounded-[33px] bg-[#f4f4f4] relative pr-2">
-      <textarea
-        value={message}
-        onChange={handleInputChange}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage(e);
-          }
-        }}
-        placeholder="Ready When You Are"
-        className="flex-1 py-2 sm:py-3 px-3 sm:px-5 rounded-[33px] bg-[#f4f4f4] focus-within:outline-none placeholder:text-slate-600 text-sm sm:text-base resize-none overflow-hidden"
-        rows="1"
-      />
-      <button
-        type="submit"
-        className="p-1.5 sm:p-2 rounded-full bg-black text-white hover:bg-opacity-75"
-      >
-        <ArrowUpIcon size={18} className="sm:w-5 sm:h-5" fontWeight={900} />
-      </button>
+        )}
+      </form>
+      <div className="text-center p-2 text-xs sm:text-sm hidden sm:block text-gray-500">
+      The World’s Most Trusted Airline
+      </div>
     </div>
-  </form>
-  <div className="text-center p-2 text-xs sm:text-sm hidden sm:block text-gray-500">
-  The World’s Most Trusted Airline
-  </div>
-</div>
-
-
   );
 };
-
 
 const Responder = () => {
   const [activeRooms, setActiveRooms] = useState({});
   const navigate = useNavigate();
 
   const playSuccessSound = () => {
-    const audio = new Audio("/soundrn.mp3");
-    audio.play().catch((error) => console.error("Error playing sound:", error));
-  };
-
-  // Request notification permission when the component is mounted
-  useEffect(() => {
-    if (Notification.permission === "default") {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          console.log("Notifications granted!");
-        }
-      });
-    }
-  }, []);
-
-  // Show notification when a new user joins
-  const showNotification = (roomId) => {
-    if (Notification.permission === "granted") {
-      new Notification("New User Joined", {
-        body: `A new user joined room: ${roomId}`,
-        icon: "/path/to/your/icon.png", // Optional icon for the notification
-      });
-    }
+    console.log('Attempting to play sound...');
+    const audio = new Audio('/soundrn.mp3');
+    
+    audio.play().then(() => {
+        console.log('Sound played successfully');
+    }).catch((error) => {
+        console.error('Error playing sound:', error);
+    });
   };
 
   useEffect(() => {
     socket.emit("getRooms");
-
-    // Handle user joining a room
-    const handleUserJoined = ({ roomId, latestMessage }) => {
+  
+    socket.on("userJoined", ({ roomId }) => {
       playSuccessSound();
-      showNotification(roomId);
-
-      // Update the activeRooms state with the latest message when a new user joins
-      setActiveRooms((prevActiveRooms) => ({
-        ...prevActiveRooms,
-        [roomId]: latestMessage || "New User here", // Ensure we store the latest message
-      }));
-
+      console.log(`User joined room: ${roomId}`);
       toast.success(`A new user joined room: ${roomId}`, {
-        onOpen: playSuccessSound,
+        onOpen: () => {
+          console.log("Toast opened, playing sound...");
+          playSuccessSound();
+        },
       });
-    };
-
-    // Handle rooms list update (when rooms are initially fetched)
-    const handleRoomsList = (roomsList) => {
+    });
+  
+    socket.on("roomsList", (roomsList) => {
+      console.log("Received rooms list:", roomsList);
       const formattedRooms = roomsList.reduce((acc, room) => {
         acc[room.id] = room.latestMessage;
         return acc;
       }, {});
       setActiveRooms(formattedRooms);
-    };
-
-    // Handle new message (question) in rooms
+    });
+  
     const handleQuestion = ({ roomId, msg }) => {
+      console.log("Received question:", msg);
       setActiveRooms((prevActive) => ({
         ...prevActive,
-        [roomId]: msg, // Update with the latest message for the room
+        [roomId]: msg,
       }));
     };
-
-    // Handle room deletion
+  
     const handleRoomDeleted = ({ roomId }) => {
+      console.log(`Room ${roomId} has been deleted`);
       setActiveRooms((prevRooms) => {
         const newRooms = { ...prevRooms };
         delete newRooms[roomId];
@@ -338,22 +375,22 @@ const Responder = () => {
       });
       toast.success(`Room ${roomId} has been deleted`);
     };
-
-    // Register event listeners
-    socket.on("userJoined", handleUserJoined);  // Listen for user join event
-    socket.on("roomsList", handleRoomsList);    // Listen for rooms list update
-    socket.on("question", handleQuestion);      // Listen for question updates (new messages)
-    socket.on("roomDeleted", handleRoomDeleted); // Listen for room deletion
-
-    // Cleanup event listeners on component unmount
+  
+    socket.on("question", handleQuestion);
+    socket.on("roomDeleted", handleRoomDeleted);
+    socket.on("getRooms", () => {
+      socket.emit("getRooms");
+    });
+  
     return () => {
-      socket.off("userJoined", handleUserJoined);
-      socket.off("roomsList", handleRoomsList);
-      socket.off("question", handleQuestion);
+      socket.off("userJoined");
+      socket.off("roomsList");
       socket.off("roomDeleted", handleRoomDeleted);
+      socket.off("question", handleQuestion);
+      socket.off("getRooms");
     };
   }, []);
-
+  
   const handleRoomClick = (roomId) => {
     navigate(`/chat/${roomId}`);
   };
@@ -363,6 +400,7 @@ const Responder = () => {
   };
 
   const deleteRoom = (roomId) => {
+    console.log(`Deleting room from client: ${roomId}`);
     socket.emit("deleteRoom", roomId);
   };
 
@@ -372,15 +410,24 @@ const Responder = () => {
         <h1 className="text-lg sm:text-xl font-semibold">Responder Dashboard</h1>
       </header>
       <main className="flex-1 overflow-auto p-2 sm:p-4 space-y-2 sm:space-y-4">
-        <div>
+        <AnimatePresence>
           {Object.keys(activeRooms).length === 0 ? (
-            <p className="text-center text-gray-500 text-sm sm:text-base">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center text-gray-500 text-sm sm:text-base"
+            >
               No active users at the moment.
-            </p>
+            </motion.p>
           ) : (
             Object.keys(activeRooms).map((roomId) => (
-              <div
+              <motion.div
                 key={roomId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
                 className="p-2 sm:p-4 rounded-lg cursor-pointer hover:bg-gray-100"
                 onClick={() => handleRoomClick(roomId)}
               >
@@ -390,7 +437,7 @@ const Responder = () => {
                     <div>
                       <h2 className="font-semibold text-sm sm:text-base">{roomId}</h2>
                       <p className="text-xs sm:text-sm text-gray-500 text-wrap">
-                        {activeRooms[roomId] || "New User here"}
+                        {activeRooms[roomId] || "No messages yet"}
                       </p>
                     </div>
                   </div>
@@ -420,10 +467,10 @@ const Responder = () => {
                     </motion.button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
-        </div>
+        </AnimatePresence>
       </main>
     </div>
   );
@@ -458,7 +505,7 @@ const App = () => {
           />
         </Routes>
       </div>
-      <Toaster/>
+      <Toaster />
     </Router>
   );
 };
