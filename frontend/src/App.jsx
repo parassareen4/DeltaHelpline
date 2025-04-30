@@ -533,7 +533,7 @@ const Chat = () => {
           <div className="flex items-center gap-2">
             <Scale className="w-6 h-6 text-legal-gold" />
             <h1 className="text-xl font-serif font-semibold text-legal-gold">
-              LegalAI Counsel
+              AI Legal Assistant
             </h1>
           </div>
         </div>
