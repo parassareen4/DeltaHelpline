@@ -598,8 +598,7 @@ const Chat = () => {
                 Welcome to LegalAI Counsel
               </h2>
               <p className="max-w-lg mx-auto text-legal-navy/80 mb-6">
-                Describe your legal situation and receive consultation based on legal principles
-                and resources. This is for informational purposes only and does not constitute legal advice.
+              Describe your legal situation to receive AI-generated insights informed by established legal principles and public resources. This service is for informational purposes only and does not constitute legal advice or create an attorney-client relationship.
               </p>
               <div className="flex justify-center">
                 <Button
