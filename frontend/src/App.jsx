@@ -595,7 +595,7 @@ const Chat = () => {
             <div className="text-center py-10">
               <Scale className="w-16 h-16 mx-auto mb-4 text-legal-burgundy opacity-80" />
               <h2 className="text-2xl font-serif font-semibold mb-3 text-legal-navy">
-                Welcome to LegalAI Counsel
+                Welcome to AI Legal Assistant
               </h2>
               <p className="max-w-lg mx-auto text-legal-navy/80 mb-6">
               Describe your legal situation to receive AI-generated insights informed by established legal principles and public resources. This service is for informational purposes only and does not constitute legal advice or create an attorney-client relationship.
