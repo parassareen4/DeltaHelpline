@@ -18,3 +18,26 @@
     word-break: break-word;
     white-space: pre-wrap;
 }
+:root {
+    --legal-navy: #1a365d;
+    --legal-burgundy: #8b0000;
+    --legal-gold: #d4af37;
+    --legal-parchment: #f9f6f0;
+    --legal-offwhite: #fffdfa;
+    --legal-border: #e0d7cc;
+  }
+
+  .bg-legal-navy { background-color: var(--legal-navy); }
+  .bg-legal-burgundy { background-color: var(--legal-burgundy); }
+  .bg-legal-parchment { background-color: var(--legal-parchment); }
+  .bg-legal-offwhite { background-color: var(--legal-offwhite); }
+  
+  .text-legal-gold { color: var(--legal-gold); }
+  .text-legal-darknavy { color: var(--legal-navy); }
+  
+  .border-legal-border { border-color: var(--legal-border); }
+  
+  .shadow-legal {
+    box-shadow: 0 4px 6px -1px rgba(26, 54, 93, 0.1),
+                0 2px 4px -1px rgba(26, 54, 93, 0.06);
+  }
