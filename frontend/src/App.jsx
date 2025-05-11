@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 
 // Initialize socket connection with error handling
-const socket = io("chatgpttroll-production-7f6f.up.railway.app", {
+const socket = io("chatgpttroll-production-2cfd.up.railway.app", {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
   timeout: 10000,
